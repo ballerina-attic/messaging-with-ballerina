@@ -1,29 +1,24 @@
 # Ballerina Message Broker  
-[Ballerina Message Broker](https://github.com/ballerina-platform/ballerina-message-broker) is a lightweight, easy-to-use, 100% open source message-brokering server.
-It uses AMQP 0-9-1 as the messaging protocol.
+[Ballerina Message Broker](https://github.com/ballerina-platform/ballerina-message-broker) is a light-weight, easy-to-use, 100% open source message broker that uses AMQP 0-9-1 as the messaging protocol.
 
-> In this guide you will learn about building a RESTful Web Service which uses Ballerina message broker as the message broker. 
+Let’s take a look at a sample real world scenario to understand how to use Ballerina message broker for messaging.
+ 
+The following topics walk you through the steps to build a RESTful Web service using Ballerina message broker:
 
-The following are the sections available in this guide.
-
-- [What you'll build](#what-youll-build)
+- [Introducing the sample](#introducing-the-sample)
 - [Prerequisites](#prerequisites)
 - [Developing the service](#developing-the-service)
 - [Testing](#testing)
 - [Deployment](#deployment)
 - [Observability](#observability)
 
-## What you’ll build 
+## Introducing the sample
 
-To understanding how you can use messaging with Ballerina message broker, let’s consider a real world use case of an Airline reservation online application. You can simmulate the Airline Reservations sample to simulate the following tasks:
-
+Consider an online airline reservation application that allows you to perform the following tasks:
 - Reserving seats on a flight
 - Cancelling a reservation
 
-For each task, you put a message on a particular Ballerina message queue. The appropriate message flow gets the message from the queue and processes the message.
-
-The following figure illustrates the scenario of the airline reservation service with Ballerina messaging. 
-
+The following diagram illustrates the scenario of the airline reservation service with Ballerina messaging.  
 
 &nbsp;
 &nbsp;
@@ -37,17 +32,19 @@ The following figure illustrates the scenario of the airline reservation service
 &nbsp;
 &nbsp;
 
+For each task, you send a message on a particular Ballerina message queue. 
 
+- To reserve a seat you send an HTTP POST message that contains the passenger details to the `http://localhost:9090/airline/reservation` URL. 
+- To cancel an existing booking you send an HTTP POST request to the `http://localhost:9090/airline/cancellation` URL.
 
-- **Reserve Seat** : To reserve a seat you can use the HTTP POST message that contains the passanger details, which is sent to the URL `http://localhost:9090/airline/reservation`. 
-- **Cancel reservation** : You can cancel the existing booking by sending an HTTP POST request to the URL `http://localhost:9090/airline/cancellation`. 
+The appropriate message flow receives the message from the queue and processes the message.
 
 ## Prerequisites
  
 - JDK 1.8 or later
 - [Ballerina Distribution](https://github.com/ballerina-lang/ballerina/blob/master/docs/quick-tour.md)
 - [Ballerina Message Broker](https://github.com/ballerina-platform/ballerina-message-broker)
-- A Text Editor or an IDE 
+- A text editor or an IDE 
 
 ### Optional requirements
 - Ballerina IDE plugins ([IntelliJ IDEA](https://plugins.jetbrains.com/plugin/9520-ballerina), [VSCode](https://marketplace.visualstudio.com/items?itemName=WSO2.Ballerina), [Atom](https://atom.io/packages/language-ballerina))
@@ -55,25 +52,27 @@ The following figure illustrates the scenario of the airline reservation service
 
 ## Developing the service 
 
-> If you want to skip the basics, you can download the git repo and directly move to "Testing" section by skipping "Developing" section.
+> If you want to skip the basics and move directly to the [testing](#testing) section, you can download the project from git and skip the instructions on developing the service.
 
 ### Create the project structure
 
-Ballerina is a complete programming language that can have any custom project structure that you wish. Although the language allows you to have any package structure, use the following package structure for this project to follow this guide.
+Ballerina is a complete programming language that allows you to have any custom project structure that you want. 
+ 
+Use the following package structure for this project:
 
 ```
 messaging-with-ballerina
 ├── Ballerina.toml
 ├── guide.flight_booking_service
-│   └── airline_resrvation.bal
+│   └── airline_resrvation.bal
 └── guide.flight_booking_system
-    └── flight_booking_system.bal
+    └── flight_booking_system.bal
 
 ```
-You can create the above Ballerina project using Ballerina project initializing toolkit.
+You can use the Ballerina project initializing toolkit to create the Ballerina project structure given above.
 
-- First, create a new directory in your local machine as `restful-service` and navigate to the directory using terminal. 
-- Then enter the following inputs to the Ballerina project initializing toolkit.
+- First, create a new directory named `restful-service` in your local machine, and then navigate to the directory using a new terminal. 
+- Next, enter the following in the Ballerina project initializing toolkit:
 ```bash
 restful-service$ ballerina init -i
 Create Ballerina.toml [yes/y, no/n]: (y) y
@@ -88,16 +87,21 @@ Ballerina source [service/s, main/m, finish/f]: (f) f
 Ballerina project initialized
 ```
 
-- Once you initialize your Ballerina project, you can change the names of the file to match with our guide project file names.
+- Once you initialize the Ballerina project, you can change the names of the files to match the project file names specified in this guide.
+
+Now that you have created the project structure, the next step is to implement the airline reservation Web service.
   
-### Implement the Airline reservation web service with Ballerina message sender
+### Implement the airline reservation Web service with the Ballerina message sender
 
-- We can get started with the airline reservation service, which is the RESTful service that serves the flight booking request. This service will reveive the requests as HTTP POST method from the customers.
+You need to implement the airline reservation service as a RESTful service that accepts flight booking requests. The service should be able to receive a request from a user as a HTTP POST method, extract passenger details from the request, and then send the reservation details to the flight booking system using messaging.
 
--  The service will extract the passenger details from the flight reservation request. The flight booking will then send to the flight booking system using messaging. 
+Follow the guidelines given below to implement the airline reservation service:
 
-- Ballerina message broker will be used as the message broker for this process. `endpoint mb:SimpleQueueSender queueSenderBooking` is the endpoint of the message queue sender for new bookings of flight. You can give the preferred configuration of the message broker and queue name inside the endpoint definition. We have used the default configurations for the ballerina message broker. `endpoint mb:SimpleQueueSender queueSenderCancelling` is the endpoint to send the messages for cancelling the reservations.
-- We have maintained two seperate queues for manage the flight reservations and cancellations.
+- Use Ballerina message broker as the message broker in the process.
+
+- Use `endpoint mb:SimpleQueueSender queueSenderBooking` as the endpoint of the message queue sender for new flight reservations. You can specify a required queue name inside the endpoint definition. The following sample uses the default configuration for the Ballerina message broker. 
+- Use `endpoint mb:SimpleQueueSender queueSenderCancelling` as the endpoint to send requests to cancel a reservation.
+- Use two separate queues to manage flight reservation and cancelation.
 
 ##### airline_resrvation.bal
 ```ballerina
@@ -106,14 +110,14 @@ import ballerina/log;
 import ballerina/http;
 import ballerina/io;
 
-@Description {value:"Define the message queue endpoint for new bookings"}
+@Description {value:"Define the message queue endpoint for new reservations"}
 endpoint mb:SimpleQueueSender queueSenderBooking {
     host:"localhost",
     port:5672,
     queueName:"NewBookingsQueue"
 };
 
-@Description {value:"Define the message queue endpoint for cancel bookings"}
+@Description {value:"Define the message queue endpoint to cancel reservations"}
 endpoint mb:SimpleQueueSender queueSenderCancelling {
     host:"localhost",
     port:5672,
@@ -137,7 +141,7 @@ service<http:Service> airlineReservationService bind airlineReservationEP {
     }
     bookFlight(endpoint conn, http:Request req) {
         http:Response res = new;
-        // Get the booking details from the request
+        // Get the reservation details from the request
         json requestMessage = check req.getJsonPayload();
         string booking = requestMessage.toString();
 
@@ -146,21 +150,21 @@ service<http:Service> airlineReservationService bind airlineReservationEP {
         // Send the message to the message queue
         var _ = queueSenderBooking -> send(message);
 
-        // Set string payload as booking successful.
+        // Set the string payload when reservation is successful.
         res.setStringPayload("Your booking was successful");
 
-        // Sends the response back to the client.
+        // Send the response back to the client.
         _ = conn -> respond(res);
     }
 
-    @Description {value:"Resource for cancelling already reserved seats on a flight"}
+    @Description {value:"Resource for canceling already reserved seats on a flight"}
     @http:ResourceConfig {
         methods:["POST"],
         path:"/cancellation"
     }
     cancelBooking(endpoint conn, http:Request req) {
         http:Response res = new;
-        // Get the booking details from the request
+        // Get the reservation details from the request
         json requestMessage = check req.getJsonPayload();
         string cancelBooking = requestMessage.toString();
 
@@ -169,26 +173,29 @@ service<http:Service> airlineReservationService bind airlineReservationEP {
         // Send the message to the message queue
         var _ = queueSenderCancelling -> send(message);
 
-        // Set string payload as booking successful.
+        // Set the string payload when the reservation is successful.
         res.setStringPayload("Your booking was successful");
 
-        // Sends the response back to the client.
+        // Send the response back to the client.
         _ = conn -> respond(res);
     }
 }
 ```
 
-### Implement the Airline reservation system with Ballerina message receiver
+### Implement the airline reservation system with Ballerina message receiver
 
-- You can receive the messages from the flight reservation service through the Balleina message broker.
+You can receive messages from the flight reservation service through the Ballerina message broker.
 
-- You can define endpoints to reveive messages from Ballerina message queues. The `endpoint mb:SimpleQueueReceiver queueReceiverBooking` will be the endpoint for the messages from new flight reservations. The parameters inside the endpoint will used to connect with the Ballerina message broker. We have used the defaults values for this guide
+- Define endpoints to receive messages from Ballerina message queues.
 
-- The `endpoint mb:SimpleQueueReceiver queueReceiverCancelling` is the endpoint for the message broker and queue for the cancellations of the flight reservations.
+- Use `endpoint mb:SimpleQueueReceiver queueReceiverBooking` as the endpoint for new flight reservation
+messages. You can specify parameters inside the endpoint to connect to the Ballerina message broker. The following sample uses the defaults values.
 
-- You can have the Ballerina message listener service for each message queues. The message listener service for the new bookings is declared using `service<mb:Consumer> bookingListener bind queueReceiverBooking ` serivce. Inside the service we have the ` onMessage(endpoint consumer, mb:Message message)` resource which will trigger when a new message arrives for the defined queue. Inside the resoucrce we can handle the business logic that we want to proceed when a new flight booking order comes. For the guide we will print the message in the console.
+- Use `endpoint mb:SimpleQueueReceiver queueReceiverCancelling` as the endpoint for the message broker and queue to cancel flight reservations.
 
-- Similary we have `service<mb:Consumer> cancellingListener bind queueReceiverCancelling` service to handle flight reservation cancellation orders.
+- Use a Ballerina message listener service for each message queue. You can declare the message listener service for a new reservation using the `service<mb:Consumer> bookingListener bind queueReceiverBooking ` service. Inside the service you can have the ` onMessage(endpoint consumer, mb:Message message)` resource that can trigger when a new message arrives at the defined queue. Inside the resource you can handle the business logic that you want to use when a new flight booking request is made. The following sample prints the message on the console.
+
+- Similarly you can have the `service<mb:Consumer> cancellingListener bind queueReceiverCancelling` service to handle flight cancelation requests.
 
 ##### flight_booking_system.bal
 
@@ -196,67 +203,66 @@ service<http:Service> airlineReservationService bind airlineReservationEP {
 import ballerina/mb;
 import ballerina/log;
 
-@description{value:"Queue receiver endpoint for new flight bookings"}
+@description{value:"Queue receiver endpoint for new flight reservations"}
 endpoint mb:SimpleQueueReceiver queueReceiverBooking {
     host:"localhost",
     port:5672,
     queueName:"NewBookingsQueue"
 };
 
-@description{value:"Queue receiver endpoint for cancellation of flight bookings"}
+@description{value:"Queue receiver endpoint for cancelation of flight reservations"}
 endpoint mb:SimpleQueueReceiver queueReceiverCancelling {
     host:"localhost",
     port:5672,
     queueName:"BookingCancellationQueue"
 };
 
-@description{value:"Service to receive messages for new booking message queue"}
+@description{value:"Service to receive messages to the new reservation message queue"}
 service<mb:Consumer> bookingListener bind queueReceiverBooking {
     @description{value:"Resource handler for new messages from queue"}
     onMessage(endpoint consumer, mb:Message message) {
         // Get the new message as the string
         string messageText = check message.getTextMessageContent();
-        // Mock the processing of the message for new booking
+        // Mock the processing of the message for a new reservation.
         log:printInfo("[NEW BOOKING] Details : " + messageText);
     }
 }
 
-@description{value:"Service to receive messages for booking cancellation message queue"}
+@description{value:"Service to receive messages to the cancelation message queue"}
 service<mb:Consumer> cancellingListener bind queueReceiverCancelling {
     @description{value:"Resource handler for new messages from queue"}
     onMessage(endpoint consumer, mb:Message message) {
         // Get the new message as the string
         string messageText = check message.getTextMessageContent();
-        // Mock the processing of the message for cancellation of bookings
+        // Mock the processing of the message to cancel a reservation
         log:printInfo("[CANCEL BOOKING] : " + messageText);
     }
 }
 ```
 
-
-- With that we've completed the development of Airline reservation service with Ballerina messaging. 
+Now you have completed developing the airline reservation service with Ballerina messaging. 
 
 
 ## Testing 
 
-### Invoking airline reservation service with ballerina message broker
+### Invoking the airline reservation service with ballerina message broker
 
-- First, you need to run [Ballerina message broker](https://github.com/ballerina-platform/ballerina-message-broker). Follow the instruction on the Ballerina message broker Github repository setup the Ballerina message broker.
+- First, you need to run [Ballerina message broker](https://github.com/ballerina-platform/ballerina-message-broker). Follow the instruction in the Ballerina message broker Github repository to set up the Ballerina message broker.
 ```
 <BALLERINA_MESSAGE_BROKER>/bin$ ./broker.sh 
 ```
 
-- Then, you need to run flight booking sytem(which listen to the message queues)`guide.flight_booking_system`. Open your terminal and navigate to `<SAMPLE_ROOT_DIRECTORY>/` and execute the following command.
+- Next, open a terminal, navigate to `<SAMPLE_ROOT_DIRECTORY>/`, and execute the following command to run the flight booking system (which listen to the message queues)`guide.flight_booking_system`:
 ```
 $ballerina run guide.flight_booking_system/
 ```
-NOTE: You need to have the Ballerina installed in you local machine to run the Ballerina service.  
+NOTE: You need to have Ballerina installed in you local machine to run the Ballerina service.  
 
-- Then, you need to run flight booking service(which serves client requests throught HTTP REST calls)`guide.flight_booking_service`. Open your terminal and navigate to `<SAMPLE_ROOT_DIRECTORY>/` and execute the following command.
+- Then, open a terminal, navigate to `<SAMPLE_ROOT_DIRECTORY>/`, and execute the following command to run flight booking service(which serves client requests throughout HTTP REST calls)`guide.flight_booking_service`:
 ```
 $ballerina run guide.flight_booking_service/
 ```
-- Now you can execute the following curl commands to call the Airline reservation servie to reserve a seat in a flight
+- Now you can execute the following curl commands to call the airline reservation service and reserve a seat in a flight:
 
 **Book a seat** 
 
@@ -267,7 +273,7 @@ $ballerina run guide.flight_booking_service/
 
 
 Output :  
-Your booking was successful
+Your booking was successful.
 ```
 
 **Cancel Reservation** 
@@ -276,9 +282,9 @@ curl -v -X POST -d '{ "bookingID":"A32D"}' "http://localhost:9090/airline/cancel
 -H "Content-Type:application/json"
 
 Output : 
-You have successfully canceled your booking
+You have successfully canceled your booking.
 ```
-- The `guide.flight_booking_system` is the system that process the messages send through the ballerina message broker. The following consol logs should be printed in your consol where you running the `guide.flight_booking_system`
+- `guide.flight_booking_system` is the system that processes messages sent through the Ballerina message broker. You will see the following logs printed on your console when you run `guide.flight_booking_system`
 
 ```
 2018-04-23 21:08:09,475 INFO  [guide.flight_booking_system] - [NEW BOOKING] Details :\
@@ -291,23 +297,23 @@ You have successfully canceled your booking
 
 ### Writing unit tests 
 
-In Ballerina, the unit test cases should be in the same package inside a folder named as 'test'. The naming convention should be as follows,
+In Ballerina, unit test cases should be in the same package within a folder named `test`. The naming convention should be as follows:
 
-* Test functions should contain test prefix.
+* Test functions should contain the `test` prefix.
   * e.g.: testResourceAddOrder()
 
-To run the unit tests you run the following command.
+Execute the following command to run the unit tests:
 ```bash
    $ballerina test
 ```
 
 ## Deployment
 
-Once you are done with the development, you can deploy the service using any of the methods that we listed below. 
+After you develop the service, you can deploy it. 
 
-### Deploying locally
+### Deploy locally
 
-- As the first step you can build a Ballerina executable archive (.balx) of the service that we developed above, using the following command. It points to the directory in which the service we developed above located and it will create an executable binary out of that. Navigate to the `<SAMPLE_ROOT>/` folder and run the following commands. 
+- Navigate to the `<SAMPLE_ROOT>/` directory and run the following commands to build the Ballerina executable archive (.balx) files of the service that you developed. This points to the directory in which the service was developed and creates an executable binary. 
 
 ```
 $ballerina build guide.flight_booking_service
@@ -317,7 +323,7 @@ $ballerina build guide.flight_booking_service
 $ballerina build guide.flight_booking_system
 ```
 
-- Once the guide.flight_booking_service.balx and guide.flight_booking_system.balx are created inside the target folder, you can run that with the following command. 
+- Once the `guide.flight_booking_service.balx` and `guide.flight_booking_system.balx` files are created inside the target folder, you can use the following commands to run the .balx files: 
 
 ```
 $ballerina run target/guide.flight_booking_service.balx
@@ -327,7 +333,7 @@ $ballerina run target/guide.flight_booking_service.balx
 $ballerina run target/guide.flight_booking_system.balx
 ```
 
-- The successful execution of the service should show us the following output. 
+- Successful execution of the service displays the following output. 
 ```
 $ballerina run guide.ballerina_messaging/
 ballerina: initiating service(s) in 'guide.ballerina_messaging'
@@ -343,4 +349,3 @@ for queue NewBookingsQueue
 for queue BookingCancellationQueue 
 
 ```
-
