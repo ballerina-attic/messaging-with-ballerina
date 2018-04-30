@@ -1,18 +1,20 @@
-# Ballerina Message Broker  
-[Ballerina Message Broker](https://github.com/ballerina-platform/ballerina-message-broker) is a light-weight, easy-to-use, 100% open source message broker that uses AMQP 0-9-1 as the messaging protocol.
+[![Build Status](https://travis-ci.org/ballerina-guides/messaging-with-ballerina.svg?branch=master)](https://travis-ci.org/ballerina-guides/messaging-with-ballerina)
 
-Let’s take a look at a sample real world scenario to understand how to use Ballerina message broker for messaging.
+# Ballerina Message Broker  
+[Ballerina Message Broker](https://github.com/ballerina-platform/ballerina-message-broker) is a light-weight, easy-to-use, 100% open source message broker that uses AMQP as the messaging protocol.
+
+> Let’s take a look at a sample real world scenario to understand how to use Ballerina message broker for messaging.
  
 The following topics walk you through the steps to build a RESTful Web service using Ballerina message broker:
 
-- [Introducing the sample](#introducing-the-sample)
+- [What you'll build](#what-youll-build)
 - [Prerequisites](#prerequisites)
-- [Developing the service](#developing-the-service)
+- [Implementation](#implementation)
 - [Testing](#testing)
 - [Deployment](#deployment)
 - [Observability](#observability)
 
-## Introducing the sample
+## What you’ll build 
 
 Consider an online airline reservation application that allows you to perform the following tasks:
 - Reserving seats on a flight
@@ -41,18 +43,17 @@ The appropriate message flow receives the message from the queue and processes t
 
 ## Prerequisites
  
-- JDK 1.8 or later
-- [Ballerina Distribution](https://github.com/ballerina-lang/ballerina/blob/master/docs/quick-tour.md)
-- [Ballerina Message Broker](https://github.com/ballerina-platform/ballerina-message-broker)
-- A text editor or an IDE 
+- [Ballerina Distribution](https://ballerina.io/learn/getting-started/)
+- A Text Editor or an IDE 
 
 ### Optional requirements
 - Ballerina IDE plugins ([IntelliJ IDEA](https://plugins.jetbrains.com/plugin/9520-ballerina), [VSCode](https://marketplace.visualstudio.com/items?itemName=WSO2.Ballerina), [Atom](https://atom.io/packages/language-ballerina))
 - [Docker](https://docs.docker.com/engine/installation/)
+- [Kubernetes](https://kubernetes.io/docs/setup/)
 
-## Developing the service 
+## Implementation
 
-> If you want to skip the basics and move directly to the [testing](#testing) section, you can download the project from git and skip the instructions on developing the service.
+> If you want to skip the basics and move directly to the [Testing](#testing) section, you can download the project from git and skip the instructions on [Implementation](#implementation) the service.
 
 ### Create the project structure
 
@@ -62,36 +63,24 @@ Use the following package structure for this project:
 
 ```
 messaging-with-ballerina
-├── Ballerina.toml
-├── guide.flight_booking_service
-│   └── airline_resrvation.bal
-└── guide.flight_booking_system
-    └── flight_booking_system.bal
-
+ └── guide
+    ├── airline_backend_system
+    │   └── flight_booking_backend.bal
+    └── flight_booking_service
+        ├── airline_resrvation.bal
+        └── tests
+            └── airline_reservation_test.bal
 ```
-You can use the Ballerina project initializing toolkit to create the Ballerina project structure given above.
+- Create the above directories in your local machine and also create empty `.bal` files.
 
-- First, create a new directory named `restful-service` in your local machine, and then navigate to the directory using a new terminal. 
-- Next, enter the following in the Ballerina project initializing toolkit:
+- Then open the terminal and navigate to `messaging-with-ballerina/guide` and run Ballerina project initializing toolkit.
 ```bash
-restful-service$ ballerina init -i
-Create Ballerina.toml [yes/y, no/n]: (y) y
-Organization name: (username) messaging-with-ballerina
-Version: (0.0.1) 
-Ballerina source [service/s, main/m]: (s) s
-Package for the service : (no package) guide.flight_booking_service
-Ballerina source [service/s, main/m]: (s) s
-Package for the service : (no package) guide.flight_booking_system
-Ballerina source [service/s, main/m, finish/f]: (f) f
-
-Ballerina project initialized
+   $ ballerina init
 ```
-
-- Once you initialize the Ballerina project, you can change the names of the files to match the project file names specified in this guide.
 
 Now that you have created the project structure, the next step is to implement the airline reservation Web service.
   
-### Implement the airline reservation Web service with the Ballerina message sender
+### Develop the airline reservation Web service with the Ballerina message sender
 
 You need to implement the airline reservation service as a RESTful service that accepts flight booking requests. The service should be able to receive a request from a user as a HTTP POST method, extract passenger details from the request, and then send the reservation details to the flight booking system using messaging.
 
@@ -182,7 +171,7 @@ service<http:Service> airlineReservationService bind airlineReservationEP {
 }
 ```
 
-### Implement the airline reservation system with Ballerina message receiver
+### Implement the airline reservation backend system with Ballerina message receiver
 
 You can receive messages from the flight reservation service through the Ballerina message broker.
 
@@ -247,21 +236,22 @@ Now you have completed developing the airline reservation service with Ballerina
 
 ### Invoking the airline reservation service with ballerina message broker
 
-- First, you need to run [Ballerina message broker](https://github.com/ballerina-platform/ballerina-message-broker). Follow the instruction in the Ballerina message broker Github repository to set up the Ballerina message broker.
+- First, you need to run Ballerina message broker.You can start Ballerina message broker by entering the following command in your termainal.
 ```
-<BALLERINA_MESSAGE_BROKER>/bin$ ./broker.sh 
+$ broker 
+```
+NOTE: Ballerina message broker is included in the Ballerina distribution. You can find the executable file of the message broker at `<BALLERINA_DISTRIBUTION>/bin/broker`. Also the Ballerina message broker is avaiblable [here](https://github.com/ballerina-platform/ballerina-message-broker).
+
+- Next, open a terminal, navigate to `messaging-with-ballerina/guide`, and execute the following command to run the airline reservation backend system (which listen to the message queues):
+```
+$ballerina run airline_backend_system
 ```
 
-- Next, open a terminal, navigate to `<SAMPLE_ROOT_DIRECTORY>/`, and execute the following command to run the flight booking system (which listen to the message queues)`guide.flight_booking_system`:
+- Then, open a terminal, navigate to `messaging-with-ballerina/guide`, and execute the following command to run flight booking service(which serves client requests throughout HTTP REST calls):
 ```
-$ballerina run guide.flight_booking_system/
+$ballerina run flight_booking_service/
 ```
-NOTE: You need to have Ballerina installed in you local machine to run the Ballerina service.  
 
-- Then, open a terminal, navigate to `<SAMPLE_ROOT_DIRECTORY>/`, and execute the following command to run flight booking service(which serves client requests throughout HTTP REST calls)`guide.flight_booking_service`:
-```
-$ballerina run guide.flight_booking_service/
-```
 - Now you can execute the following curl commands to call the airline reservation service and reserve a seat in a flight:
 
 **Book a seat** 
@@ -270,7 +260,6 @@ $ballerina run guide.flight_booking_service/
  curl -v -X POST -d '{ "Name":"Alice", "SSN":123456789, "Address":"345,abc,def", \
  "Telephone":112233 }' "http://localhost:9090/airline/reservation" -H \
  "Content-Type:application/json"
-
 
 Output :  
 Your booking was successful.
@@ -284,28 +273,33 @@ curl -v -X POST -d '{ "bookingID":"A32D"}' "http://localhost:9090/airline/cancel
 Output : 
 You have successfully canceled your booking.
 ```
-- `guide.flight_booking_system` is the system that processes messages sent through the Ballerina message broker. You will see the following logs printed on your console when you run `guide.flight_booking_system`
+- `airline_backend_system` is the system that processes messages sent through the Ballerina message broker. You will see the following logs printed on your console when you run `guide.flight_booking_system`
 
 ```
-2018-04-23 21:08:09,475 INFO  [guide.flight_booking_system] - [NEW BOOKING] Details :\
+2018-04-23 21:08:09,475 INFO  [airline_backend_system] - [NEW BOOKING] Details :\
 {"Name":"Alice","SSN":123456789,"Address":"345,abc,def","Telephone":112233} 
 
-2018-04-23 21:10:59,439 INFO  [guide.flight_booking_system] - [CANCEL BOOKING] : \
+2018-04-23 21:10:59,439 INFO  [airline_backend_system] - [CANCEL BOOKING] : \
 {"bookingID":"AV323D"} 
 
 ```
 
 ### Writing unit tests 
 
-In Ballerina, unit test cases should be in the same package within a folder named `test`. The naming convention should be as follows:
-
-* Test functions should contain the `test` prefix.
-  * e.g.: testResourceAddOrder()
-
-Execute the following command to run the unit tests:
-```bash
-   $ballerina test
+In Ballerina, the unit test cases should be in the same package inside a folder named as 'tests'.  When writing the test functions the below convention should be followed.
+- Test functions should be annotated with `@test:Config`. See the below example.
+```ballerina
+   @test:Config
+   function testBookingService() {
 ```
+
+To run the unit tests, open your terminal and navigate to `messaging-with-ballerina/guide`, and run the following command.
+```bash
+$ ballerina test flight_booking_service 
+```
+NOTE: You need to run Ballerina message broker before running the above test case
+
+To check the implementation of the test file, refer to the `tests` directories in the [repository](https://github.com/ballerina-guides/messaging-with-ballerina).
 
 ## Deployment
 
@@ -313,24 +307,24 @@ After you develop the service, you can deploy it.
 
 ### Deploy locally
 
-- Navigate to the `<SAMPLE_ROOT>/` directory and run the following commands to build the Ballerina executable archive (.balx) files of the service that you developed. This points to the directory in which the service was developed and creates an executable binary. 
+- As the first step, you can build a Ballerina executable archive (.balx) of the services that we developed above. Navigate to `messaging-with-ballerina/guide` and run the following commands. 
 
 ```
-$ballerina build guide.flight_booking_service
-```
-
-```
-$ballerina build guide.flight_booking_system
-```
-
-- Once the `guide.flight_booking_service.balx` and `guide.flight_booking_system.balx` files are created inside the target folder, you can use the following commands to run the .balx files: 
-
-```
-$ballerina run target/guide.flight_booking_service.balx
+$ballerina build flight_booking_service
 ```
 
 ```
-$ballerina run target/guide.flight_booking_system.balx
+$ballerina build airline_backend_system
+```
+
+- Once the `flight_booking_service.balx` and `flight_booking_system.balx` files are created inside the target folder, you can use the following commands to run the .balx files: 
+
+```
+$ballerina run target/flight_booking_service.balx
+```
+
+```
+$ballerina run target/airline_backend_system.balx
 ```
 
 - Successful execution of the service displays the following output. 
