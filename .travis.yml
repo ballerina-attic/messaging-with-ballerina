@@ -40,5 +40,8 @@ script:
 # Initialize the Ballerina project
 - ballerina init
 
+# Run Ballerina message broker
+- broker
+
 # Run tests
-- ballerina test -c ballerina.conf
+- ballerina test flight_booking_service
