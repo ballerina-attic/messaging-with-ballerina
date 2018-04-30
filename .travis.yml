@@ -41,7 +41,7 @@ script:
 - ballerina init
 
 # Run Ballerina message broker
-- broker
+- broker &
 
 # Run tests
 - ballerina test flight_booking_service
