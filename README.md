@@ -25,7 +25,7 @@ The following diagram illustrates the scenario of the airline reservation servic
 &nbsp;
 &nbsp;
 
-![Ballerina Message Broker](images/messaging-with-ballerina.png "Ballerina Message Broker")
+![Ballerina Message Broker](images/messaging-with-ballerina.svg "Ballerina Message Broker")
 
 &nbsp;
 &nbsp;
