@@ -16,7 +16,7 @@ endpoint mb:SimpleQueueReceiver queueReceiverCancelling {
 };
 
 @Description{value:"Service to receive messages for new booking message queue"}
-service<mb:Consumer> bookingListener bind queueReceiverBooking {
+service<mb:Consumer> FlightBooking bind queueReceiverBooking {
     @Description{value:"Resource handler for new messages from queue"}
     onMessage(endpoint consumer, mb:Message message) {
         // Get the new message as the string
@@ -27,7 +27,7 @@ service<mb:Consumer> bookingListener bind queueReceiverBooking {
 }
 
 @Description{value:"Service to receive messages for booking cancellation message queue"}
-service<mb:Consumer> cancellingListener bind queueReceiverCancelling {
+service<mb:Consumer> FlightCancellation bind queueReceiverCancelling {
     @Description{value:"Resource handler for new messages from queue"}
     onMessage(endpoint consumer, mb:Message message) {
         // Get the new message as the string
