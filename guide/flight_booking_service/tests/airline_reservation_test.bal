@@ -24,23 +24,22 @@ function afterFunc() {
 @test:Config
 function testReservation() {
     // Initialize the empty http request and response
-    http:Request req ;
-    json sampleRequest = {"Name":"Alice","ID":123456789};
+    http:Request req;
+    json sampleRequest = { "Name": "Alice", "ID": 123456789 };
     req.setJsonPayload(sampleRequest);
-    string expectedResponse ="Your booking was successful";
-    var resp = check httpEndpoint->post("/reservation", request = req);
-    test:assertEquals(resp.getTextPayload(),expectedResponse, msg = "Reservation failed");
+    string expectedResponse = "Your booking was successful";
+    var resp = check httpEndpoint->post("/reservation", req);
+    test:assertEquals(resp.getTextPayload(), expectedResponse, msg = "Reservation failed");
 }
 
 @test:Config
 function testCancellation() {
     // Initialize the empty http request and response
-    http:Request req ;
-    json sampleRequest = {"Name":"Alice","ID":123456789};
+    http:Request req;
+    json sampleRequest = { "Name": "Alice", "ID": 123456789 };
     req.setJsonPayload(sampleRequest);
-    string expectedResponse ="You have successfully canceled your booking";
-    var resp = check httpEndpoint->post("/cancellation", request = req);
-    test:assertEquals(resp.getTextPayload(),expectedResponse, msg = "Cancellation
+    string expectedResponse = "You have successfully canceled your booking";
+    var resp = check httpEndpoint->post("/cancellation", req);
+    test:assertEquals(resp.getTextPayload(), expectedResponse, msg = "Cancellation
     failed");
 }
-
