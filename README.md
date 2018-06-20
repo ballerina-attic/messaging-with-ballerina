@@ -92,42 +92,44 @@ Follow the guidelines given below to implement the airline reservation service:
 - Use `endpoint mb:SimpleQueueSender queueSenderCancelling` as the endpoint to send requests to cancel a reservation.
 - Use two separate queues to manage flight reservation and cancelation.
 
-##### airline_resrvation.bal
+##### airline_reservation.bal
 ```ballerina
 import ballerina/mb;
 import ballerina/log;
 import ballerina/http;
 import ballerina/io;
 
-@Description {value:"Define the message queue endpoint for new reservations"}
+documentation { Define the message queue endpoint for new reservations. }
 endpoint mb:SimpleQueueSender queueSenderBooking {
-    host:"localhost",
-    port:5672,
-    queueName:"NewBookingsQueue"
+    host: "localhost",
+    port: 5672,
+    queueName: "NewBookingsQueue"
 };
 
-@Description {value:"Define the message queue endpoint to cancel reservations"}
+documentation { Define the message queue endpoint to cancel reservations. }
 endpoint mb:SimpleQueueSender queueSenderCancelling {
-    host:"localhost",
-    port:5672,
-    queueName:"BookingCancellationQueue"
+    host: "localhost",
+    port: 5672,
+    queueName: "BookingCancellationQueue"
 };
 
-@Description {value:"Attributes associated with the service endpoint"}
+documentation { Attributes associated with the service endpoint. }
 endpoint http:Listener airlineReservationEP {
-    port:9090
+    port: 9090
 };
 
-@Description {value:"Airline reservation service exposed via HTTP/1.1."}
+documentation { Airline reservation service exposed via HTTP/1.1. }
 @http:ServiceConfig {
-    basePath:"/airline"
+    basePath: "/airline"
 }
 service<http:Service> airlineReservationService bind airlineReservationEP {
-    @Description {value:"Resource for reserving seats on a flight"}
+
+
     @http:ResourceConfig {
-        methods:["POST"],
-        path:"/reservation"
+        methods: ["POST"],
+        path: "/reservation"
     }
+    documentation { Resource for reserving seats on a flight }
     bookFlight(endpoint conn, http:Request req) {
         http:Response res = new;
         // Get the reservation details from the request
@@ -137,20 +139,20 @@ service<http:Service> airlineReservationService bind airlineReservationEP {
         // Create a message to send to the flight reservation system
         mb:Message message = check queueSenderBooking.createTextMessage(booking);
         // Send the message to the message queue
-        var _ = queueSenderBooking -> send(message);
+        _ = queueSenderBooking->send(message);
 
         // Set the string payload when reservation is successful.
-        res.setStringPayload("Your booking was successful");
+        res.setPayload("Your booking was successful");
 
         // Send the response back to the client.
-        _ = conn -> respond(res);
+        _ = conn->respond(res);
     }
 
-    @Description {value:"Resource for canceling already reserved seats on a flight"}
     @http:ResourceConfig {
-        methods:["POST"],
-        path:"/cancellation"
+        methods: ["POST"],
+        path: "/cancellation"
     }
+    documentation { Resource for canceling already reserved seats on a flight }
     cancelBooking(endpoint conn, http:Request req) {
         http:Response res = new;
         // Get the reservation details from the request
@@ -160,13 +162,13 @@ service<http:Service> airlineReservationService bind airlineReservationEP {
         // Create a message to send to the flight reservation system
         mb:Message message = check queueSenderCancelling.createTextMessage(cancelBooking);
         // Send the message to the message queue
-        var _ = queueSenderCancelling -> send(message);
+        _ = queueSenderCancelling->send(message);
 
         // Set the string payload when the reservation is successful.
-        res.setStringPayload("Your booking was successful");
+        res.setPayload("You have successfully canceled your booking");
 
         // Send the response back to the client.
-        _ = conn -> respond(res);
+        _ = conn->respond(res);
     }
 }
 ```
@@ -186,29 +188,30 @@ messages. You can specify parameters inside the endpoint to connect to the Balle
 
 - Similarly you can have the `service<mb:Consumer> cancellingListener bind queueReceiverCancelling` service to handle flight cancelation requests.
 
-##### flight_booking_system.bal
+##### flight_booking_backend.bal
 
 ```ballerina
 import ballerina/mb;
 import ballerina/log;
 
-@description{value:"Queue receiver endpoint for new flight reservations"}
+documentation { Queue receiver endpoint for new flight reservations. }
 endpoint mb:SimpleQueueReceiver queueReceiverBooking {
-    host:"localhost",
-    port:5672,
-    queueName:"NewBookingsQueue"
+    host: "localhost",
+    port: 5672,
+    queueName: "NewBookingsQueue"
 };
 
-@description{value:"Queue receiver endpoint for cancelation of flight reservations"}
+documentation { Queue receiver endpoint for cancelation of flight reservations. }
 endpoint mb:SimpleQueueReceiver queueReceiverCancelling {
-    host:"localhost",
-    port:5672,
-    queueName:"BookingCancellationQueue"
+    host: "localhost",
+    port: 5672,
+    queueName: "BookingCancellationQueue"
 };
 
-@description{value:"Service to receive messages to the new reservation message queue"}
+documentation { Service to receive messages to the new reservation message queue. }
 service<mb:Consumer> bookingListener bind queueReceiverBooking {
-    @description{value:"Resource handler for new messages from queue"}
+
+    documentation { Resource handler for new messages from queue. }
     onMessage(endpoint consumer, mb:Message message) {
         // Get the new message as the string
         string messageText = check message.getTextMessageContent();
@@ -217,9 +220,10 @@ service<mb:Consumer> bookingListener bind queueReceiverBooking {
     }
 }
 
-@description{value:"Service to receive messages to the cancelation message queue"}
+documentation { Service to receive messages to the cancelation message queue. }
 service<mb:Consumer> cancellingListener bind queueReceiverCancelling {
-    @description{value:"Resource handler for new messages from queue"}
+
+    documentation { Resource handler for new messages from queue. }
     onMessage(endpoint consumer, mb:Message message) {
         // Get the new message as the string
         string messageText = check message.getTextMessageContent();
@@ -249,7 +253,7 @@ $ballerina run airline_backend_system
 
 - Then, open a terminal, navigate to `messaging-with-ballerina/guide`, and execute the following command to run flight booking service(which serves client requests throughout HTTP REST calls):
 ```
-$ballerina run flight_booking_service/
+$ballerina run flight_booking_service
 ```
 
 - Now you can execute the following curl commands to call the airline reservation service and reserve a seat in a flight:
@@ -262,7 +266,7 @@ $ballerina run flight_booking_service/
  "Content-Type:application/json"
 
 Output :  
-Your booking was successful.
+Your booking was successful
 ```
 
 **Cancel Reservation** 
@@ -271,7 +275,7 @@ curl -v -X POST -d '{ "bookingID":"A32D"}' "http://localhost:9090/airline/cancel
 -H "Content-Type:application/json"
 
 Output : 
-You have successfully canceled your booking.
+You have successfully canceled your booking
 ```
 - `airline_backend_system` is the system that processes messages sent through the Ballerina message broker. You will see the following logs printed on your console when you run `guide.flight_booking_system`
 

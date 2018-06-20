@@ -1,38 +1,40 @@
 import ballerina/mb;
 import ballerina/log;
 
-@Description{value:"Queue receiver endpoint for new flight bookings"}
+documentation { Queue receiver endpoint for new flight reservations. }
 endpoint mb:SimpleQueueReceiver queueReceiverBooking {
-    host:"localhost",
-    port:5672,
-    queueName:"NewBookingsQueue"
+    host: "localhost",
+    port: 5672,
+    queueName: "NewBookingsQueue"
 };
 
-@Description{value:"Queue receiver endpoint for cancellation of flight bookings"}
+documentation { Queue receiver endpoint for cancelation of flight reservations. }
 endpoint mb:SimpleQueueReceiver queueReceiverCancelling {
-    host:"localhost",
-    port:5672,
-    queueName:"BookingCancellationQueue"
+    host: "localhost",
+    port: 5672,
+    queueName: "BookingCancellationQueue"
 };
 
-@Description{value:"Service to receive messages for new booking message queue"}
-service<mb:Consumer> FlightBooking bind queueReceiverBooking {
-    @Description{value:"Resource handler for new messages from queue"}
+documentation { Service to receive messages to the new reservation message queue. }
+service<mb:Consumer> bookingListener bind queueReceiverBooking {
+
+    documentation { Resource handler for new messages from queue. }
     onMessage(endpoint consumer, mb:Message message) {
         // Get the new message as the string
         string messageText = check message.getTextMessageContent();
-        // Mock the processing of the message for new booking
+        // Mock the processing of the message for a new reservation.
         log:printInfo("[NEW BOOKING] Details : " + messageText);
     }
 }
 
-@Description{value:"Service to receive messages for booking cancellation message queue"}
-service<mb:Consumer> FlightCancellation bind queueReceiverCancelling {
-    @Description{value:"Resource handler for new messages from queue"}
+documentation { Service to receive messages to the cancelation message queue. }
+service<mb:Consumer> cancellingListener bind queueReceiverCancelling {
+
+    documentation { Resource handler for new messages from queue. }
     onMessage(endpoint consumer, mb:Message message) {
         // Get the new message as the string
         string messageText = check message.getTextMessageContent();
-        // Mock the processing of the message for cancellation of bookings
+        // Mock the processing of the message to cancel a reservation
         log:printInfo("[CANCEL BOOKING] : " + messageText);
     }
 }
