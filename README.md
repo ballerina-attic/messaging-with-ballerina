@@ -556,7 +556,7 @@ enabled=true
 
 To start the ballerina service using the configuration file, run the following command
 ```
-   $ ballerina run flight_booking_service/ --config flight_booking_service/ballerina.conf
+   $ ballerina run --config flight_booking_service/ballerina.conf flight_booking_service/
 ```
 NOTE: The above configuration is the minimum configuration needed to enable tracing and metrics. With these configurations default values are load as the other configuration parameters of metrics and tracing.
 
@@ -589,9 +589,9 @@ Follow the following steps to use tracing with Ballerina.
    -p14268:14268 jaegertracing/all-in-one:latest
 ```
 
-- Navigate to `messaging-with-ballerina/guide` and run the restful-service using following command 
+- Navigate to `messaging-with-ballerina/guide` and run the restful-service using the following command
 ```
-   $ ballerina run flight_booking_service/ --config flight_booking_service/ballerina.conf
+   $ ballerina run --config flight_booking_service/ballerina.conf flight_booking_service/
 ```
 
 - Observe the tracing using Jaeger UI using following URL
@@ -635,9 +635,9 @@ Follow the below steps to set up Prometheus and view metrics for Ballerina restf
    prom/prometheus
 ```
 
-- Navigate to `messaging-with-ballerina/guide` and run the restful-service using following command
+- Navigate to `messaging-with-ballerina/guide` and run the restful-service using the following command
 ```
-   $ ballerina run flight_booking_service/ --config flight_booking_service/ballerina.conf
+   $ ballerina run --config flight_booking_service/ballerina.conf flight_booking_service/
 ```
 
 - You can access Prometheus at the following URL
