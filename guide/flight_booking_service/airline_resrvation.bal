@@ -1,7 +1,7 @@
-import ballerina/mb;
-import ballerina/log;
 import ballerina/http;
 import ballerina/io;
+import ballerina/log;
+import ballerina/mb;
 
 documentation { Define the message queue endpoint for new reservations. }
 endpoint mb:SimpleQueueSender queueSenderBooking {
