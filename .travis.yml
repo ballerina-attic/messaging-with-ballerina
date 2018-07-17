@@ -13,41 +13,26 @@
 # limitations under the License.
 
 script:
-# Declare STRING variable
-- STRING="Downloading ballerina..."
-
-# Declare variable for Ballerina version
-- BALLERINA_VERSION=0.976.1-SNAPSHOT
-
-# Declare variable for distribution name
+- BALLERINA_VERSION="${VERSION:-0.976.1-SNAPSHOT}"
 - DISTRIBUTION_NAME=ballerina-platform-$BALLERINA_VERSION
+- DOWNLOAD_CHANNEL="${CHANNEL:-nightly}"
+- DOWNLOAD_URL="${URL:-https://product-dist.ballerina.io}"
 
-# Print STRING variables
-- echo $DISTRIBUTION_NAME
+- wget $DOWNLOAD_URL/$DOWNLOAD_CHANNEL/$BALLERINA_VERSION/$DISTRIBUTION_NAME.zip
 
-# Download Ballerina dist
-- wget https://product-dist.ballerina.io/nightly/$BALLERINA_VERSION/$DISTRIBUTION_NAME.zip
-
-# Unzip the zip file
 - unzip -q $DISTRIBUTION_NAME.zip
 
-# Add Ballerina to the path variable
 - export PATH=$PATH:$(pwd)/$DISTRIBUTION_NAME/bin
 
-# Print Ballerina version
 - ballerina version
 
-# Change the directory
 - cd guide
 
-# Initialize the Ballerina project
 - ballerina init
 
-# Run Ballerina message broker
 - broker &
 
 # Wait 15s to make sure that the broker is started
 - sleep 15
 
-# Run tests
 - ballerina test flight_booking_service
