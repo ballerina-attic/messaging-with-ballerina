@@ -14,9 +14,18 @@
 
 script:
 - BALLERINA_VERSION="${VERSION:-0.976.1-SNAPSHOT}"
+
 - DISTRIBUTION_NAME=ballerina-platform-$BALLERINA_VERSION
+
 - DOWNLOAD_CHANNEL="${CHANNEL:-nightly}"
+
 - DOWNLOAD_URL="${URL:-https://product-dist.ballerina.io}"
+
+- echo "Ballerina Version: ${BALLERINA_VERSION}"
+
+- echo "Download Channel: ${DOWNLOAD_CHANNEL}"
+
+- echo "Download URL: $DOWNLOAD_URL/$DOWNLOAD_CHANNEL/$BALLERINA_VERSION/$DISTRIBUTION_NAME.zip"
 
 - wget $DOWNLOAD_URL/$DOWNLOAD_CHANNEL/$BALLERINA_VERSION/$DISTRIBUTION_NAME.zip
 
