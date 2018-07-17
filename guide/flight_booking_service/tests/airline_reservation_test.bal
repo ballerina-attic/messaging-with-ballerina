@@ -11,14 +11,14 @@ endpoint http:Client httpEndpoint {
 @test:BeforeSuite
 function beforeFunc() {
     // Start employee database service
-    _ = test:startServices("flight_booking_service");
+    //_ = test:startServices("flight_booking_service");
 }
 
 // After suite function
 @test:AfterSuite
 function afterFunc() {
     // Stop employee database service
-    test:stopServices("flight_booking_service");
+    //test:stopServices("flight_booking_service");
 }
 
 @test:Config
