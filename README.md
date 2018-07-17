@@ -376,14 +376,14 @@ import ballerina/mb;
 
 documentation { value: "Queue sender endpoint for new bookings" }
 endpoint mb:SimpleQueueSender queueSenderBooking {
-    host: "localhost",
+    host: "<IP_ADDRESS_OF_BALLERINA_MESSAGE_BROKER_CONTAINER>",
     port: 5672,
     queueName: "NewBookingsQueue"
 };
 
 documentation { value: "Queue sender endpoint for cancel bookings" }
 endpoint mb:SimpleQueueSender queueSenderCancelling {
-    host: "localhost",
+    host: "<IP_ADDRESS_OF_BALLERINA_MESSAGE_BROKER_CONTAINER>",
     port: 5672,
     queueName: "BookingCancellationQueue"
 };
@@ -408,18 +408,30 @@ service<http:Service> AirlineReservation bind airlineReservationEP {
 ##### flight_booking_backend.bal
 ```ballerina
 import ballerinax/docker;
-import ballerina/http;
-import ballerina/io;
 import ballerina/log;
 import ballerina/mb;
 
+documentation { Queue receiver endpoint for new flight reservations. }
 @docker:Config {
     registry:"ballerina.guides.io",
     name:"flight_booking_backend",
     tag:"v1.0"
 }
-service<mb:Consumer> bookingListener bind { host: "<IP_ADDRESS_OF_BALLERINA_MESSAGE_BROKER_CONTAINER>",
-                                                                             port: 5672, queueName: "NewBookingsQueue" } {
+endpoint mb:SimpleQueueReceiver queueReceiverBooking {
+    host: "<IP_ADDRESS_OF_BALLERINA_MESSAGE_BROKER_CONTAINER>",
+    port: 5672,
+    queueName: "NewBookingsQueue"
+};
+
+documentation { Queue receiver endpoint for cancelation of flight reservations. }
+endpoint mb:SimpleQueueReceiver queueReceiverCancelling {
+    host: "<IP_ADDRESS_OF_BALLERINA_MESSAGE_BROKER_CONTAINER>",
+    port: 5672,
+    queueName: "BookingCancellationQueue"
+};
+
+documentation { Service to receive messages to the new reservation message queue. }
+service<mb:Consumer> bookingListener bind queueReceiverBooking {
 
     documentation { Resource handler for new messages from queue. }
     onMessage(endpoint consumer, mb:Message message) {
@@ -430,8 +442,9 @@ service<mb:Consumer> bookingListener bind { host: "<IP_ADDRESS_OF_BALLERINA_MESS
     }
 }
 
-service<mb:Consumer> cancellingListener bind { host: "<IP_ADDRESS_OF_BALLERINA_MESSAGE_BROKER_CONTAINER>",
-                                                                     port: 5672, queueName: "BookingCancellationQueue" } {
+documentation { Service to receive messages to the cancelation message queue. }
+service<mb:Consumer> cancellingListener bind queueReceiverCancelling {
+
     documentation { Resource handler for new messages from queue. }
     onMessage(endpoint consumer, mb:Message message) {
         // Get the new message as the string
@@ -456,7 +469,7 @@ This will also create the corresponding Docker image using the Docker annotation
    $ ballerina build airline_backend_system
 
    Run following command to start Docker container:
-   docker run -d -p 5672:5672 ballerina.guides.io/flight_booking_backend:v1.0
+   docker run -d ballerina.guides.io/flight_booking_backend:v1.0
 ```
 
 - Once you successfully build the Docker images, you can run it with the `docker run` command that is shown in the previous step.
@@ -511,14 +524,14 @@ import ballerinax/kubernetes;
 
 @Description { value: "Queue sender endpoint for new bookings" }
 endpoint mb:SimpleQueueSender queueSenderBooking {
-    host: "172.17.0.2",
+    host: "<IP_ADDRESS_OF_BALLERINA_MESSAGE_BROKER_CONTAINER>",
     port: 5672,
     queueName: "NewBookingsQueue"
 };
 
 @Description { value: "Queue sender endpoint for cancel bookings" }
 endpoint mb:SimpleQueueSender queueSenderCancelling {
-    host: "172.17.0.2",
+    host: "<IP_ADDRESS_OF_BALLERINA_MESSAGE_BROKER_CONTAINER>",
     port: 5672,
     queueName: "BookingCancellationQueue"
 };
