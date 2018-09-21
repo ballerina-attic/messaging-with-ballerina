@@ -3,37 +3,36 @@ import ballerina/io;
 import ballerina/log;
 import ballerina/mb;
 
-documentation { Define the message queue endpoint for new reservations. }
+# Define the message queue endpoint for new reservations.
 endpoint mb:SimpleQueueSender queueSenderBooking {
     host: "localhost",
     port: 5672,
     queueName: "NewBookingsQueue"
 };
 
-documentation { Define the message queue endpoint to cancel reservations. }
+# Define the message queue endpoint to cancel reservations.
 endpoint mb:SimpleQueueSender queueSenderCancelling {
     host: "localhost",
     port: 5672,
     queueName: "BookingCancellationQueue"
 };
 
-documentation { Attributes associated with the service endpoint. }
+# Attributes associated with the service endpoint.
 endpoint http:Listener airlineReservationEP {
     port: 9090
 };
 
-documentation { Airline reservation service exposed via HTTP/1.1. }
+# Airline reservation service exposed via HTTP/1.1.
 @http:ServiceConfig {
     basePath: "/airline"
 }
 service<http:Service> airlineReservationService bind airlineReservationEP {
 
-
+    # Resource for reserving seats on a flight
     @http:ResourceConfig {
         methods: ["POST"],
         path: "/reservation"
     }
-    documentation { Resource for reserving seats on a flight }
     bookFlight(endpoint conn, http:Request req) {
         http:Response res = new;
         // Get the reservation details from the request
@@ -52,11 +51,11 @@ service<http:Service> airlineReservationService bind airlineReservationEP {
         _ = conn->respond(res);
     }
 
+    # Resource for canceling already reserved seats on a flight
     @http:ResourceConfig {
         methods: ["POST"],
         path: "/cancellation"
     }
-    documentation { Resource for canceling already reserved seats on a flight }
     cancelBooking(endpoint conn, http:Request req) {
         http:Response res = new;
         // Get the reservation details from the request
